@@ -7,6 +7,7 @@ This is a very basic slider for use with jquery for PhoneGap applications. The s
 to fit the container they are placed in. The slides use hardware acceleration to transition between slides.
 
 HTML Markup:
+<code>
   <div id="slider">
     <div class="slides">
       <div class="slide-wrapper">
@@ -31,6 +32,8 @@ HTML Markup:
       </div>
     </div>
   </div>
-  
+</code>
 Basic usage:
+<code>
   var slider = $("#slider").slider();
+</code>
