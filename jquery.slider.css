@@ -1,0 +1,77 @@
+.slider .animate {
+ 	-webkit-transition: -webkit-transform 0.3s ease-out;
+}
+
+.slider {
+  	width: 100%;
+  	height: 100%;
+  	overflow: hidden;
+}
+
+.slider .slides {
+  	height: 100%;
+  	overflow-y: hidden;
+}
+
+.slider .slide-wrapper {
+  	height: 100%;
+  	float: left;
+  	position: relative;
+  	overflow: hidden;
+}
+
+.slider .slide {
+  	height: 100%;
+  	width: 100%;
+  	position: relative;
+}
+
+.slider .slide div {
+  	width: 100%;
+  	height: 100%;
+  	z-index: 0;
+}
+
+.slider .sliderPagination {
+	position: absolute;
+	left: 0;
+	bottom: 0;
+	width: 100%;
+	height: 30px;
+	z-index: 20;
+	text-align: center;
+    display: none;
+}
+
+.slider .sliderPagination p {
+	margin: 0px;
+	padding: 0px;
+	height: 100%;
+	line-height: 31px;
+	z-index: 1;
+}
+
+.slider .sliderPagination p .left-arrow {
+	margin-right: 5px;
+}
+
+.slider .sliderPagination p .right-arrow {
+	margin-left: 5px;
+}
+
+.slider .sliderPagination > div {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	z-index: 2;
+}
+
+.slider .sliderPagination > div.left {
+	left: 0;
+	right: 50%;
+}
+
+.slider .sliderPagination > div.right {
+	left: 50%;
+	right: 0;
+}
