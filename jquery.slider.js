@@ -153,7 +153,7 @@
 					this.index = i;
 				}
 				this.el.container.one( 'webkitTransitionEnd', function() {
-					slider.options.afterAnimation(that);
+					slider.options.afterAnimation(slider);
 				});
 				this.options.beforeAnimation(this);
 				this.updatePagination();
