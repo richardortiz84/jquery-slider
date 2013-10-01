@@ -37,3 +37,10 @@ to fit the container they are placed in. The slides use hardware acceleration to
 ```html
 var slider = $("#slider").slider();
 ```
+##Options:
+```html
+  beforeAnimation       Function to be called before slides start animation
+  afterAnimation        Function be called after slides finish animation
+  init                  Function to be called during slider initialization
+  showpagination        Boolean to hide or show slide number indicators
+```
