@@ -4,7 +4,8 @@ jquery-slider
 Jquery Plugin - Basic Slider
 
 This is a very basic slider for use with jquery for PhoneGap applications. The slides are responsive and will resize
-to fit the container they are placed in. The slides use hardware acceleration to transition between slides.
+to fit the container they are placed in. The slides use hardware acceleration to transition between slides respond
+to touch events.
 
 ##HTML Markup:
 ```html
