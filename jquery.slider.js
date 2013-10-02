@@ -19,9 +19,12 @@
 			longTouch: undefined,
 
 			init: function() {
+				this.setup();
+
 				if ( !this.checkSetup() ) {
 					return;
 				}
+
 				this.setupElements();
 			  	this.bindUIEvents();
 			  	this.calculateWidth();
@@ -30,6 +33,23 @@
 			  	this.options.init(this);
 
 			  	this.animate(0);
+			},
+
+			refresh: function() {
+				this.setup();
+
+				if ( !this.checkSetup() ) {
+					return;
+				}
+
+				this.calculateWidth();
+				this.updatePagination();
+				this.animate();
+			},
+
+			setup: function() {
+				this.el.holder = this.el.container.find('.slides');
+			  	this.el.slides = this.el.holder.find('.slide-wrapper');
 			},
 
 			checkSetup: function() {
@@ -47,16 +67,16 @@
 			},
 
 			setupElements: function() {
-				if ( this.options.showpagination ) {
+				if ( this.options.showPagination ) {
 					var pagination = $('<div class="sliderPagination"><p><span class="left-arrow">&#9664;</span><span class="current"></span> of <span class="total"></span><span class="right-arrow">&#9654;</span></p><div class="left">&nbsp;</div><div class="right">&nbsp;</div></div></div>');
 					this.el.container.append(pagination);
 					this.el.pagination = pagination;
 
-					pagination.find('div.left').on( 'touchstart', function() {
+					pagination.find('div.left').on( 'touchstart mouseup', function() {
 				        slider.prev();
 				    });
 
-				    pagination.find('div.right').on('touchstart', function() {
+				    pagination.find('div.right').on('touchstart mouseup', function() {
 				        slider.next();
 				    });
 				}
@@ -65,23 +85,23 @@
 			},
 
 			bindUIEvents: function() {
-				this.el.holder.on("touchstart", function(event) {
+				this.el.holder.on("touchstart mousedown", function(event) {
 					slider.start(event);
-				});
 
-				this.el.holder.on("touchmove", function(event) {
-					slider.move(event);
-				});
+					slider.el.holder.on("touchmove mousemove", function(event) {
+						slider.move(event);
+					});
 
-				this.el.holder.on("touchend", function(event) {
-					slider.end(event);
+					slider.el.holder.on("touchend mouseup touchcancel mousecancel", function(event) {
+						slider.end(event);
+					});
 				});
 			},
 
 			calculateWidth: function() {
 				var width = this.el.slides.length * this.el.container.width();
-				this.el.holder.css('width', width + 'px');
 
+				this.el.holder.css('width', width + 'px');
 				this.el.slides.css('width', this.el.container.width() + 'px');
 			},
 
@@ -123,6 +143,8 @@
 			},
 
 			end: function(event) {
+				slider.el.holder.off("touchmove mousemove").off("touchend mouseup touchcancel mousecancel");
+				console.log('end');
 		  		// Calculate the distance swiped.
 		  		if ( this.movex != 0 ) {
 			  		var absMove = Math.abs(this.index*this.slideWidth - this.movex);
@@ -149,12 +171,14 @@
 			},
 
 			animate: function(i) {
-				if ( i !== undefined && i >= 0 && i < this.el.slides.length) {
-					this.index = i;
-				}
+				if ( i !== undefined ) this.index = i;
+				if ( this.index < 0 ) this.index = 0;
+				if ( this.index >= this.el.slides.length ) this.index = this.el.slides.length-1;
+
 				this.el.container.one( 'webkitTransitionEnd', function() {
 					slider.options.afterAnimation(slider);
 				});
+
 				this.options.beforeAnimation(this);
 				this.updatePagination();
 				// Move and animate the elements.
@@ -212,11 +236,10 @@
 	}
 
 	$.slider.defaults = {
-	    // Callback API
-	    beforeAnimation: function(){},           //Callback: function(slider) - Fires asynchronously with each slider animation
+	    beforeAnimation: function(){},
 	    afterAnimation: function(){},
 	    init: function(){},
-	    showpagination: true
+	    showPagination: true
   	}
 
 	$.fn.slider = function(options) {
@@ -235,6 +258,7 @@
 		    	case "previous": $slider.prev(); break;
 		    	case "first": $slider.first(); break;
 		    	case "last": $slider.last(); break;
+		    	case "refresh": $slider.refresh(); break;
 		    	default: if (typeof options === "number") $slider.animate(options);
 		  	}
 		}
