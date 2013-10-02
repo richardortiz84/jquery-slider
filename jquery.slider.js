@@ -144,7 +144,6 @@
 
 			end: function(event) {
 				slider.el.holder.off("touchmove mousemove").off("touchend mouseup touchcancel mousecancel");
-				console.log('end');
 		  		// Calculate the distance swiped.
 		  		if ( this.movex != 0 ) {
 			  		var absMove = Math.abs(this.index*this.slideWidth - this.movex);
@@ -227,6 +226,20 @@
 						this.el.pagination.hide();
 					}
 				}
+			},
+
+			currentSlide: function() {
+				var slide = null;
+
+				if ( this.el.slides.length ) {
+					slide = this.el.container.find('div.slide-wrapper:eq('+slider.index+')');
+				}
+
+				return slide;
+			},
+
+			totalSlides: function() {
+				return this.el.slides.length;
 			}
 		};
 
