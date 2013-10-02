@@ -5,7 +5,7 @@ Jquery Plugin - Basic Slider
 
 This is a very basic slider for use with jquery for mobile and web applications. The slides are responsive and will resize
 to fit the container they are placed in. The slides use hardware acceleration to transition between slides and also respond
-to touch events for a much smoother native feel on mobile browsers.
+to touch events for a much smoother native feel on mobile browsers and hybrid applications.
 
 ##HTML Markup:
 ```html
