@@ -38,6 +38,17 @@ to touch events for a much smoother native feel on mobile browsers and hybrid ap
 ```html
 var slider = $("#slider").slider();
 ```
+##Advanced usage:
+```html
+var slider = $("#slider").slider({
+  afterAnimation: function(slider) {
+    var currentSlide = slider.currentSlide();
+    var totalSlides = slider.totalSlides();
+    
+    // do something with the current slide
+  }
+});
+```
 ##Options:
 ```html
   beforeAnimation       Function to be called before slides start animation
