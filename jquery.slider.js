@@ -37,6 +37,8 @@
 
 			refresh: function() {
 				this.setup();
+				this.setupElements();
+
 				this.updatePagination();
 
 				if ( !this.checkSetup() ) {
@@ -69,12 +71,18 @@
 
 			setupElements: function() {
 				if ( this.options.showPagination ) {
+					if ( this.el.container.find('div.sliderPagination').length > 0 ) {
+						this.el.container.find('div.sliderPagination').remove();
+					}
+
 					var html = '<div class="sliderPagination"><div><p><span class="left-arrow">&#9664;</span>';
 					var ellipsis = '<span class="ellipsis"><span>&nbsp;</span></span>';
 
 					if ( this.options.paginationType == 'ellipsis' ) {
-						if ( this.options.paginationDisplay == 'fixed' ) {
-							html += ellipsis + ellipsis + ellipsis;
+						if ( this.options.ellipsisDisplay == 'fixed' ) {
+							for ( var i = 0; (i < 3 && i < this.el.slides.length); i++ ) {
+								html += ellipsis;
+							}
 						} else { //default
 							for ( var i = 0; i < this.el.slides.length; i++ ) {
 								html += ellipsis;
@@ -99,7 +107,7 @@
 				    });
 				}
 
-				this.el.container.addClass('slider');
+				this.el.container.toggleClass('slider', true);
 			},
 
 			bindUIEvents: function() {
@@ -233,8 +241,15 @@
 							this.el.pagination.find('.left-arrow').css('visibility', 'hidden');
 							this.el.pagination.find('.right-arrow').css('visibility', 'hidden');
 
-							if ( this.options.paginationDisplay == 'fixed' ) {
-								html += ellipsis + ellipsis + ellipsis;
+							if ( this.options.ellipsisDisplay == 'fixed' ) {
+								this.el.pagination.find('span.ellipsis.current').removeClass('current');
+								if ( this.index < 1 ) {
+									this.el.pagination.find('span.ellipsis:eq(0)').addClass('current');
+								} else if ( this.index == (this.el.slides.length-1) ) {
+									this.el.pagination.find('span.ellipsis:eq(2)').addClass('current');
+								} else {
+									this.el.pagination.find('span.ellipsis:eq(1)').addClass('current');
+								}
 							} else { //default
 								this.el.pagination.find('span.ellipsis.current').removeClass('current');
 								this.el.pagination.find('span.ellipsis:eq('+this.index+')').addClass('current');
@@ -287,7 +302,7 @@
 	    onRefresh: function(){},
 	    showPagination: true,
 	    paginationType: 'numbers',  // types: numbers, ellipsis
-	    paginationDisplay: 'default' // displays: default, fixed
+	    ellipsisDisplay: 'default' // displays: default, fixed
   	}
 
 	$.fn.slider = function(options) {
