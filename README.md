@@ -54,5 +54,12 @@ var slider = $("#slider").slider({
   beforeAnimation       Function to be called before slides start animation
   afterAnimation        Function be called after slides finish animation
   init                  Function to be called during slider initialization
-  showpagination        Boolean to hide or show slide number indicators
+  showpagination        Boolean to hide or show slide indicators
+  paginationType        String declaring type of pagination to display
+                        numbers  - Will display numbers, 1 of 12
+                        ellipsis - Will display circlular dots
+  ellipsisDisplay       String declaring how to display ellipsis pagination indicators
+                        default  - Will display one dot per slide
+                        fixed - Will display 3 dots, left indicating first slide, right
+                        indicating last slide, center indicating all others in between
 ```
