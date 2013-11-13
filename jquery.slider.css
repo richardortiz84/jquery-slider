@@ -17,7 +17,8 @@
   	height: 100%;
   	float: left;
   	position: relative;
-  	overflow: hidden;
+  	overflow-y: scroll;
+	-webkit-overflow-scrolling: touch;
 }
 
 .slider .slide {
@@ -40,23 +41,65 @@
 	height: 30px;
 	z-index: 20;
 	text-align: center;
-    display: none;
 }
 
-.slider .sliderPagination p {
+.slider .sliderPagination div:not(.right):not(.left) {
+	width: 100%;
+	height: 100%;
+	text-align: center;
+}
+
+.slider .sliderPagination div > p {
 	margin: 0px;
 	padding: 0px;
 	height: 100%;
 	line-height: 31px;
 	z-index: 1;
+	display: inline-block;
+}
+
+.slider .sliderPagination div > p > span {
+	display: block;
+	height: 100%;
+	position: relative;
+	margin: 0px;
+	padding: 0px;
+	float: left;
+}
+
+.slider .sliderPagination div > p > span.ellipsis {
+	margin: 0px 5px; 
+	width: 12px;
+}
+
+.slider .sliderPagination div > p > span.ellipsis > span {
+	width: 12px;
+	height: 12px;
+	position: absolute;
+	background: grey;
+	border-radius: 50%;
+	top: 50%;
+	left: 0;
+	margin-top: -6px;
+	border: 1px solid transparent;
+}
+
+.slider .sliderPagination div > p > span.current,
+.slider .sliderPagination div > p > span.total {
+	margin: 0px 5px;
+}
+
+.slider .sliderPagination div > p > span.ellipsis.current > span {
+	background: #C41230;
+	border: 1px solid rgb(111, 23, 23);
 }
 
 .slider .sliderPagination p .left-arrow {
-	margin-right: 5px;
+	margin-right: 10px;
 }
 
 .slider .sliderPagination p .right-arrow {
-	margin-left: 5px;
+	margin-left: 10px;
 }
 
 .slider .sliderPagination > div {
