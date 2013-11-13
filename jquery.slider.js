@@ -37,14 +37,15 @@
 
 			refresh: function() {
 				this.setup();
+				this.updatePagination();
 
 				if ( !this.checkSetup() ) {
 					return;
 				}
 
 				this.calculateWidth();
-				this.updatePagination();
 				this.animate();
+				this.options.onRefresh(this);
 			},
 
 			setup: function() {
@@ -68,15 +69,32 @@
 
 			setupElements: function() {
 				if ( this.options.showPagination ) {
-					var pagination = $('<div class="sliderPagination"><p><span class="left-arrow">&#9664;</span><span class="current"></span> of <span class="total"></span><span class="right-arrow">&#9654;</span></p><div class="left">&nbsp;</div><div class="right">&nbsp;</div></div></div>');
+					var html = '<div class="sliderPagination"><div><p><span class="left-arrow">&#9664;</span>';
+					var ellipsis = '<span class="ellipsis"><span>&nbsp;</span></span>';
+
+					if ( this.options.paginationType == 'ellipsis' ) {
+						if ( this.options.paginationDisplay == 'fixed' ) {
+							html += ellipsis + ellipsis + ellipsis;
+						} else { //default
+							for ( var i = 0; i < this.el.slides.length; i++ ) {
+								html += ellipsis;
+							}
+						}
+					} else { //default
+						html += '<span class="current"></span> <span>of</span> <span class="total"></span>';
+					}
+
+					html += '<span class="right-arrow">&#9654;</span></p></div><div class="left">&nbsp;</div><div class="right">&nbsp;</div></div></div>';
+
+					var pagination = $(html);
 					this.el.container.append(pagination);
 					this.el.pagination = pagination;
 
-					pagination.find('div.left').on( 'touchstart mouseup', function() {
+					pagination.find('div.left').off(touchStartEvent).on(touchStartEvent, function(event) {
 				        slider.prev();
 				    });
 
-				    pagination.find('div.right').on('touchstart mouseup', function() {
+				    pagination.find('div.right').off(touchStartEvent).on(touchStartEvent, function(event) {
 				        slider.next();
 				    });
 				}
@@ -85,14 +103,14 @@
 			},
 
 			bindUIEvents: function() {
-				this.el.holder.on("touchstart mousedown", function(event) {
+				this.el.holder.on(touchStartEvent, function(event) {
 					slider.start(event);
 
-					slider.el.holder.on("touchmove mousemove", function(event) {
+					slider.el.holder.on(touchMoveEvent, function(event) {
 						slider.move(event);
 					});
 
-					slider.el.holder.on("touchend mouseup touchcancel mousecancel", function(event) {
+					slider.el.holder.on(touchStopEvent + ' ' + touchCancelEvent, function(event) {
 						slider.end(event);
 					});
 				});
@@ -143,13 +161,13 @@
 			},
 
 			end: function(event) {
-				slider.el.holder.off("touchmove mousemove").off("touchend mouseup touchcancel mousecancel");
+				slider.el.holder.off(touchMoveEvent).off(touchStopEvent + ' ' + touchCancelEvent);
 		  		// Calculate the distance swiped.
 		  		if ( this.movex != 0 ) {
 			  		var absMove = Math.abs(this.index*this.slideWidth - this.movex);
 
 			  		// Calculate the index. All other calculations are based on the index.
-			  		if (absMove > this.slideWidth/2 || this.longTouch === false) {
+			  		if (absMove > this.slideWidth/4 || this.longTouch === false) {
 			    		if (this.movex > this.index*this.slideWidth && this.index < (this.el.slides.length-1)) {
 			      			this.index++;
 			      			this.animate();
@@ -209,21 +227,35 @@
 			updatePagination: function() {
 				if ( this.el.pagination && this.el.pagination.length ) {
 					if ( this.el.slides.length ) {
-						this.el.pagination.show();
-						this.el.pagination.find('.current').html((this.index+1));
-						this.el.pagination.find('.total').html(this.el.slides.length);
-						if ( this.index < 1 ) {
-							this.el.pagination.find('.left-arrow').hide();
-						} else {
-							this.el.pagination.find('.left-arrow').show();
-						}
-						if ( this.el.slides.length <= 1 || (this.index >= (this.el.slides.length-1)) ) {
-							this.el.pagination.find('.right-arrow').hide();
-						} else {
-							this.el.pagination.find('.right-arrow').show();
+						this.el.pagination.css('visibility', 'visible');
+
+						if ( this.options.paginationType == 'ellipsis' ) {
+							this.el.pagination.find('.left-arrow').css('visibility', 'hidden');
+							this.el.pagination.find('.right-arrow').css('visibility', 'hidden');
+
+							if ( this.options.paginationDisplay == 'fixed' ) {
+								html += ellipsis + ellipsis + ellipsis;
+							} else { //default
+								this.el.pagination.find('span.ellipsis.current').removeClass('current');
+								this.el.pagination.find('span.ellipsis:eq('+this.index+')').addClass('current');
+							}
+						} else { //default
+							if ( this.index < 1 ) {
+								this.el.pagination.find('.left-arrow').css('visibility', 'hidden');
+							} else {
+								this.el.pagination.find('.left-arrow').css('visibility', 'visible');
+							}
+							if ( this.el.slides.length <= 1 || (this.index >= (this.el.slides.length-1)) ) {
+								this.el.pagination.find('.right-arrow').css('visibility', 'hidden');
+							} else {
+								this.el.pagination.find('.right-arrow').css('visibility', 'visible');
+							}
+
+							this.el.pagination.find('.current').html((this.index+1));
+							this.el.pagination.find('.total').html(this.el.slides.length);
 						}
 					} else {
-						this.el.pagination.hide();
+						this.el.pagination.css('visibility', 'hidden');
 					}
 				}
 			},
@@ -252,7 +284,10 @@
 	    beforeAnimation: function(){},
 	    afterAnimation: function(){},
 	    init: function(){},
-	    showPagination: true
+	    onRefresh: function(){},
+	    showPagination: true,
+	    paginationType: 'numbers',  // types: numbers, ellipsis
+	    paginationDisplay: 'default' // displays: default, fixed
   	}
 
 	$.fn.slider = function(options) {
