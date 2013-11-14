@@ -7,6 +7,8 @@ This is a very basic slider for use with jquery for mobile and web applications.
 to fit the container they are placed in. The slides use hardware acceleration to transition between slides and also respond
 to touch events for a much smoother native feel on mobile browsers and hybrid applications.
 
+Requires [Jquery Touch/Tap Events](https://github.com/richardortiz84/jquery.touchtapevents)
+
 ##HTML Markup:
 ```html
   <div id="slider">
