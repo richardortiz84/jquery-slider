@@ -56,6 +56,8 @@
 	line-height: 31px;
 	z-index: 1;
 	display: inline-block;
+	white-space: nowrap;
+	overflow: hidden;
 }
 
 .slider .sliderPagination div > p > span {
@@ -65,6 +67,7 @@
 	margin: 0px;
 	padding: 0px;
 	float: left;
+	width: 10px;
 }
 
 .slider .sliderPagination div > p > span.ellipsis {
@@ -101,6 +104,24 @@
 	border: 1px solid rgb(111, 23, 23);
 }
 
+.slider .sliderPagination div > div.scrollbar {
+	padding: 15px 20px 5px 20px;
+	opacity: 1;
+}
+
+.slider .sliderPagination div > div.scrollbar > div.container {
+	background: white;
+	border-radius: 20px;
+	border: 1px solid rgba(0,0,0,.2);
+}
+
+.slider .sliderPagination div > div.scrollbar > div.container > div.bar {
+	width: 26px;
+	background: rgba(162, 162, 162, 0.7);
+	border-radius: 17px;
+	border: 1px solid transparent;
+}
+
 .slider .sliderPagination p .left-arrow {
 	margin-right: 10px;
 }
@@ -124,4 +145,62 @@
 .slider .sliderPagination > div.right {
 	left: 50%;
 	right: 0;
+}
+
+.fadeOut {
+	-webkit-animation: fadeout 1s;
+	-moz-animation: fadeout 1s;
+	animation: fadeout 1s;
+	
+	-webkit-animation-fill-mode:forwards;  /* this makes sure that after animation is done we remain at the last keyframe value (opacity: 1)*/
+	-moz-animation-fill-mode:forwards;
+	animation-fill-mode:forwards;
+	
+	-webkit-animation-iteration-count: 1;
+	-moz-animation-iteration-count: 1;
+	animation-iteration-count: 1;
+}
+
+@-webkit-keyframes fadeout {
+	0% {opacity: 1;}
+	100% {opacity: 0;}
+}
+
+@-moz-keyframes fadeout {
+	0% {opacity: 1;}
+	100% {opacity: 0;}
+}
+
+@keyframes fadeout {
+	0% {opacity: 1;}
+	100% {opacity: 0;}
+}
+
+.fadeIn {
+	-webkit-animation: fadein 1s;
+	-moz-animation: fadein 1s;
+	animation: fadein 1s;
+	
+	-webkit-animation-fill-mode:forwards;  /* this makes sure that after animation is done we remain at the last keyframe value (opacity: 1)*/
+    	-moz-animation-fill-mode:forwards;
+	animation-fill-mode:forwards;
+    
+    	-webkit-animation-iteration-count: 1;
+    	-moz-animation-iteration-count: 1;
+	animation-iteration-count: 1;
+}
+
+@-webkit-keyframes fadein {
+	0% {opacity: 0;}
+	100% {opacity: 1;}
+}
+
+@-moz-keyframes fadein {
+	0% {opacity: 0;}
+	100% {opacity: 1;}
+}
+
+@keyframes fadein {
+	0% {opacity: 0;}
+	100% {opacity: 1;}
 }
