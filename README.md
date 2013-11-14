@@ -58,8 +58,12 @@ var slider = $("#slider").slider({
   paginationType        String declaring type of pagination to display
                         numbers  - Will display numbers, 1 of 12
                         ellipsis - Will display circlular dots
+                        scrollbar - Will display a scrollbar
   ellipsisDisplay       String declaring how to display ellipsis pagination indicators
                         default  - Will display one dot per slide
                         fixed - Will display 3 dots, left indicating first slide, right
                         indicating last slide, center indicating all others in between
+  scrollWithBarOnly     Boolean to restrict scroll bar movement only when the scrollbar
+                        is being moved (this does not restrict slide movement by sliding)
+  scrollBarFade         Boolean that will fade out the scrollbar when not in use
 ```
