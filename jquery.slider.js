@@ -1,3 +1,5 @@
+// GitHub Repository - https://github.com/richardortiz84/jquery-slider
+
 (function ($) {
   	$.slider = function(el, options) {
   		var $el = $(el);
@@ -14,9 +16,11 @@
 			slideWidth: $el.width(),
 			touchstartx: undefined,
 			touchmovex: undefined,
+			touchoffsetx: null,
 			movex: undefined,
 			index: 0,
 			longTouch: undefined,
+			scrollbarFadeTimer: null,
 
 			init: function() {
 				this.setup();
@@ -75,10 +79,18 @@
 						this.el.container.find('div.sliderPagination').remove();
 					}
 
-					var html = '<div class="sliderPagination"><div><p><span class="left-arrow">&#9664;</span>';
+					var html = '<div class="sliderPagination"><div>';
 					var ellipsis = '<span class="ellipsis"><span>&nbsp;</span></span>';
+					var leftArrow = '<p><span class="left-arrow">&#9664;</span>';
+					var rightArrow = '<span class="right-arrow">&#9654;</span></p>';
+					var leftRight = '<div class="left">&nbsp;</div><div class="right">&nbsp;</div></div>';
 
-					if ( this.options.paginationType == 'ellipsis' ) {
+					if ( this.options.paginationType == 'scrollbar' ) {
+						html += '<div class="scrollbar"><div class="container"><div class="bar"></div></div></div>';
+						leftRight = '';
+					} else if ( this.options.paginationType == 'ellipsis' ) {
+						html += leftArrow;
+
 						if ( this.options.ellipsisDisplay == 'fixed' ) {
 							for ( var i = 0; (i < 3 && i < this.el.slides.length); i++ ) {
 								html += ellipsis;
@@ -88,11 +100,13 @@
 								html += ellipsis;
 							}
 						}
+
+						html += rightArrow;
 					} else { //default
-						html += '<span class="current"></span> <span>of</span> <span class="total"></span>';
+						html += leftArrow + '<span class="current"></span> <span>of</span> <span class="total"></span>' + rightArrow;
 					}
 
-					html += '<span class="right-arrow">&#9654;</span></p></div><div class="left">&nbsp;</div><div class="right">&nbsp;</div></div></div>';
+					html += '</div>'+leftRight+'</div>';
 
 					var pagination = $(html);
 					this.el.container.append(pagination);
@@ -105,6 +119,34 @@
 				    pagination.find('div.right').off(touchStartEvent).on(touchStartEvent, function(event) {
 				        slider.next();
 				    });
+
+				    if ( this.options.paginationType == 'scrollbar' ) {
+				    	pagination.find('div.bar').off(touchStartEvent).on(touchStartEvent, function(event) {
+				    		slider.touchstartx = event.originalEvent.touches ? event.originalEvent.touches[0].pageX : event.pageX;
+				    		slider.touchoffsetx = slider.touchstartx - slider.el.pagination.find('div.bar').position().left;
+				    	});
+
+				    	pagination.find('div.scrollbar > div.container').off(touchStartEvent).on(touchStartEvent, function(event) {
+				    		event.stopPropagation();
+				    		event.preventDefault();
+
+				    		if ( slider.options.scrollWithBarOnly == true ) {
+				    			if ( $(event.target) != slider.el.pagination.find('div.bar') ) {
+				    				return false;
+				    			}
+				    		}
+
+				    		slider.startScrollBar(event);
+
+				    		$(this).on(touchMoveEvent, function(event) {
+				    			slider.moveScrollBar(event);
+				    		});
+
+				    		$(this).on(touchStopEvent + ' ' + touchCancelEvent, function(event) {
+				    			slider.endScrollBar(event);
+				    		});
+				    	});
+				    }
 				}
 
 				this.el.container.toggleClass('slider', true);
@@ -162,6 +204,33 @@
 		    		this.el.holder.css('transform','translate3d(-' + this.movex + 'px,0,0)');
 		  		}
 
+		  		if ( this.options.paginationType == 'scrollbar' ) {
+		  			var scrollbar = this.el.pagination.find('div.scrollbar'),
+									scrollbarContainer = scrollbar.find('div.container'),
+									bar = scrollbarContainer.find('div.bar'),
+									containerWidth = scrollbarContainer.width(),
+									barWidth = bar.outerWidth(true),
+									perc = 0,
+									offset = 0;
+
+					if ( this.options.scrollBarFade == true ) {
+						scrollbar.removeClass('fadeOut');
+					}
+
+					if (this.movex < ((this.el.slides.length-1) * this.el.container.width())) {
+						perc = (this.movex / ((this.el.slides.length-1) * this.el.container.width()));
+					} else {
+						if ( this.touchstartx > this.touchmovex ) {
+							perc = 1;
+						} else {
+							perc = ((((this.el.slides.length-1) * this.el.container.width())+this.movex) / ((this.el.slides.length) * this.el.container.width()))
+						}
+					}
+
+					offset = (containerWidth-barWidth)*perc;
+					bar.addClass('animate').css('transform', 'translate3d(' + offset + 'px,0,0)');
+				}
+
 		  		if ( this.index > 0 ) {
 			  		event.stopPropagation();
 			  		event.preventDefault();
@@ -193,6 +262,79 @@
 			  		event.stopPropagation();
 			  		event.preventDefault();
 			  	}
+			},
+
+			startScrollBar: function(event) {
+				event.stopPropagation();
+			  	event.preventDefault();
+
+				// Get the original touch position.
+				this.movex = 0;
+				this.touchmovex = this.touchstartx = event.originalEvent.touches ? event.originalEvent.touches[0].pageX : event.pageX;
+				
+				if ( this.touchoffsetx == null ) {
+					this.touchmovex = this.touchstartx;
+					this.touchoffsetx = this.el.pagination.find('div.bar').width()/2;
+				}
+
+				// The movement gets all janky if there's a transition on the elements.
+			  	this.el.container.find('.animate').removeClass('animate');
+
+				this.animateScrollbar();
+			},
+
+			moveScrollBar: function(event) {
+				event.stopPropagation();
+			  	event.preventDefault();
+
+			  	// Continuously return touch position.
+		 	 	this.touchmovex = event.originalEvent.touches ? event.originalEvent.touches[0].pageX : event.pageX;
+
+				this.animateScrollbar();
+			},
+
+			endScrollBar: function(event) {
+				event.stopPropagation();
+			  	event.preventDefault();
+
+			  	var scrollbar = this.el.pagination.find('div.scrollbar'),
+					scrollbarContainer = scrollbar.find('div.container'),
+					bar = scrollbarContainer.find('div.bar'),
+					containerWidth = scrollbarContainer.width(),
+					barWidth = bar.outerWidth(true),
+					perc, offset;
+
+				offset = Math.max( 0, Math.min( (containerWidth-barWidth), this.touchmovex-this.touchoffsetx-scrollbarContainer.position().left));
+				offset = Math.max( 0, Math.min( containerWidth, (offset+barWidth) ) );
+		 	 	perc = offset / containerWidth;
+
+		 	 	slide = Math.floor((this.el.slides.length-1)*perc);
+
+		 	 	this.animate(slide);
+				this.el.pagination.find('div.scrollbar > div.container').off(touchMoveEvent).off(touchStopEvent + ' ' + touchCancelEvent);
+		  		
+		  		this.touchoffsetx = null;
+			},
+
+			animateScrollbar: function() {
+				var scrollbar = this.el.pagination.find('div.scrollbar'),
+					scrollbarContainer = scrollbar.find('div.container'),
+					bar = scrollbarContainer.find('div.bar'),
+					containerWidth = scrollbarContainer.width(),
+					barWidth = bar.outerWidth(true),
+					perc, offset;
+
+				if ( this.options.scrollBarFade == true ) {
+					scrollbar.removeClass('fadeOut');
+				}
+
+			  	offset = Math.max( 0, Math.min( (containerWidth-barWidth), this.touchmovex-this.touchoffsetx-scrollbarContainer.position().left));
+			  	bar.css('transform', 'translate3d(' + offset + 'px,0,0)');
+
+			  	offset = Math.max( 0, Math.min( containerWidth, (offset+barWidth) ) );
+		 	 	perc = offset / containerWidth;
+
+		 	 	this.el.holder.css('transform','translate3d(-' + (((this.el.slides.length-1) * this.slideWidth)*perc) + 'px,0,0)');
 			},
 
 			animate: function(i) {
@@ -237,7 +379,29 @@
 					if ( this.el.slides.length ) {
 						this.el.pagination.css('visibility', 'visible');
 
-						if ( this.options.paginationType == 'ellipsis' ) {
+						 if ( this.options.paginationType == 'scrollbar' ) {
+						 	this.el.pagination.find('.left-arrow').css('visibility', 'hidden');
+							this.el.pagination.find('.right-arrow').css('visibility', 'hidden');
+
+							var scrollbar = this.el.pagination.find('div.scrollbar'),
+								scrollbarContainer = scrollbar.find('div.container'),
+								bar = scrollbarContainer.find('div.bar'),
+								containerWidth = scrollbarContainer.width(),
+								barWidth = bar.outerWidth(true),
+								perc = this.index/(this.el.slides.length-1),
+								offset = (containerWidth-barWidth)*perc;
+
+							bar.addClass('animate').css('transform', 'translate3d(' + offset + 'px,0,0)');
+							if ( this.options.scrollBarFade == true ) {
+								if ( this.scrollbarFadeTimer ) {
+									clearTimeout(this.scrollbarFadeTimer);
+								}
+								scrollbar.removeClass('fadeOut');
+								this.scrollbarFadeTimer = setTimeout(function() {
+									scrollbar.addClass('fadeOut');
+								}, 2000);
+							}
+						 } else if ( this.options.paginationType == 'ellipsis' ) {
 							this.el.pagination.find('.left-arrow').css('visibility', 'hidden');
 							this.el.pagination.find('.right-arrow').css('visibility', 'hidden');
 
@@ -251,6 +415,28 @@
 									this.el.pagination.find('span.ellipsis:eq(1)').addClass('current');
 								}
 							} else { //default
+								var leftArrow, rightArrow, ellipsis, p, canfit;
+
+								leftArrow = this.el.pagination.find('span.left-arrow').outerWidth(true);
+								rightArrow = this.el.pagination.find('span.right-arrow').outerWidth(true);
+								ellipsis = this.el.pagination.find('span.ellipsis').outerWidth(true);
+								p = this.el.pagination.children('div:not(.left):not(.right)').children('p');
+
+								canfit = Math.floor((this.slideWidth-leftArrow-rightArrow) / ellipsis);
+
+								var offset = 0;
+
+								if ( this.index < (Math.floor(canfit/2)) ) {
+									offset = 0;
+								} else if ( this.index >= ((this.el.slides.length-1)-(Math.floor(canfit/2))) ) {
+									offset = leftArrow + (((this.el.slides.length-1)-canfit)*ellipsis) - rightArrow;
+								} else {
+									offset = leftArrow + (((this.index-1)-(Math.floor(canfit/2)))*ellipsis);
+								}
+
+								p.css('width', (leftArrow+rightArrow+(ellipsis*this.el.slides.length)) + 'px');
+								p.addClass('animate').css('transform', 'translate3d(-' + offset + 'px,0,0)');
+
 								this.el.pagination.find('span.ellipsis.current').removeClass('current');
 								this.el.pagination.find('span.ellipsis:eq('+this.index+')').addClass('current');
 							}
@@ -302,7 +488,9 @@
 	    onRefresh: function(){},
 	    showPagination: true,
 	    paginationType: 'numbers',  // types: numbers, ellipsis
-	    ellipsisDisplay: 'default' // displays: default, fixed
+	    ellipsisDisplay: 'default', // displays: default, fixed
+	    scrollWithBarOnly: false, // only starts scroll when user moves the scrollbar and not the container
+	    scrollBarFade: false,
   	}
 
 	$.fn.slider = function(options) {
